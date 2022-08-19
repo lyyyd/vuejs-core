@@ -146,10 +146,11 @@ function parseChildren(
   mode: TextModes,
   ancestors: ElementNode[]
 ): TemplateChildNode[] {
-  const parent = last(ancestors)
+  const parent = last(ancestors) // 获取当前节点的父节点
   const ns = parent ? parent.ns : Namespaces.HTML
-  const nodes: TemplateChildNode[] = []
+  const nodes: TemplateChildNode[] = [] // 存储解析后的节点
 
+  // 当标签未闭合时，解析对应节点
   while (!isEnd(context, mode, ancestors)) {
     __TEST__ && assert(context.source.length > 0)
     const s = context.source
@@ -252,6 +253,7 @@ function parseChildren(
     }
   }
 
+  // 处理空白字符，提高输出效率
   // Whitespace handling strategy like v2
   let removedWhitespace = false
   if (mode !== TextModes.RAWTEXT && mode !== TextModes.RCDATA) {
@@ -304,6 +306,7 @@ function parseChildren(
     }
   }
 
+  // 移除空白字符，返回解析后的节点数组
   return removedWhitespace ? nodes.filter(Boolean) : nodes
 }
 
