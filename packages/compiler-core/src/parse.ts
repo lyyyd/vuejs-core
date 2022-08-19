@@ -105,10 +105,10 @@ export function baseParse(
   content: string,
   options: ParserOptions = {}
 ): RootNode {
-  const context = createParserContext(content, options)
-  const start = getCursor(context)
-  return createRoot(
-    parseChildren(context, TextModes.DATA, []),
+  const context = createParserContext(content, options) // 创建解析的上下文对象
+  const start = getCursor(context) // 生成记录解析过程的游标信息
+  return createRoot( // 生成并返回 root 根节点
+    parseChildren(context, TextModes.DATA, []), // 解析子节点，作为 root 根节点的 children 属性
     getSelection(context, start)
   )
 }
