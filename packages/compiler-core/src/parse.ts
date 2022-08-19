@@ -142,9 +142,9 @@ function createParserContext(
 }
 
 function parseChildren(
-  context: ParserContext,
-  mode: TextModes,
-  ancestors: ElementNode[]
+  context: ParserContext, // 解析器上下文
+  mode: TextModes, // 文本数据类型
+  ancestors: ElementNode[] // 祖先节点数组
 ): TemplateChildNode[] {
   const parent = last(ancestors) // 获取当前节点的父节点
   const ns = parent ? parent.ns : Namespaces.HTML
@@ -156,22 +156,30 @@ function parseChildren(
     const s = context.source
     let node: TemplateChildNode | TemplateChildNode[] | undefined = undefined
 
+    // 在 while 中解析器会判断文本数据的类型，只有当 TextModes 为 DATA 或 RCDATA 时会继续往下解析。
     if (mode === TextModes.DATA || mode === TextModes.RCDATA) {
+      /**
+       * 第一种情况就是判断是否需要解析 Vue 模板语法中的 “Mustache”语法 (双大括号) ，
+       * 如果当前上下文中没有 v-pre 指令来跳过表达式，并且源模板字符串是以我们指定的分隔符开头的
+       * （此时 context.options.delimiters 中是双大括号），就会进行双大括号的解析。
+       * 这里就可以发现，如果当你有特殊需求，
+       * 不希望使用双大括号作为表达式插值，那么你只需要在编译前改变选项中的 delimiters 属性即可。
+       */
       if (!context.inVPre && startsWith(s, context.options.delimiters[0])) {
         // '{{'
         node = parseInterpolation(context, mode)
-      } else if (mode === TextModes.DATA && s[0] === '<') {
+      } else if (mode === TextModes.DATA && s[0] === '<') { // 如果第一个字符是 “<” 
         // https://html.spec.whatwg.org/multipage/parsing.html#tag-open-state
-        if (s.length === 1) {
+        if (s.length === 1) { // s只有一个字符 <, 抛出错误
           emitError(context, ErrorCodes.EOF_BEFORE_TAG_NAME, 1)
-        } else if (s[1] === '!') {
+        } else if (s[1] === '!') { // 第一个字符是 ! 
           // https://html.spec.whatwg.org/multipage/parsing.html#markup-declaration-open-state
-          if (startsWith(s, '<!--')) {
+          if (startsWith(s, '<!--')) { // <!--开头
             node = parseComment(context)
-          } else if (startsWith(s, '<!DOCTYPE')) {
+          } else if (startsWith(s, '<!DOCTYPE')) { // <!DOCTYPE 开头， 对于 DOCTYPE 会进行忽略，解析成注释。
             // Ignore DOCTYPE by a limitation.
             node = parseBogusComment(context)
-          } else if (startsWith(s, '<![CDATA[')) {
+          } else if (startsWith(s, '<![CDATA[')) { // <![CDATA[ 开头
             if (ns !== Namespaces.HTML) {
               node = parseCDATA(context, ancestors)
             } else {
@@ -182,7 +190,7 @@ function parseChildren(
             emitError(context, ErrorCodes.INCORRECTLY_OPENED_COMMENT)
             node = parseBogusComment(context)
           }
-        } else if (s[1] === '/') {
+        } else if (s[1] === '/') { // 之后会判断当第二个字符是 “/” 的情况，
           // https://html.spec.whatwg.org/multipage/parsing.html#end-tag-open-state
           if (s.length === 2) {
             emitError(context, ErrorCodes.EOF_BEFORE_TAG_NAME, 2)
