@@ -462,12 +462,29 @@ function parseElement(
 
   // 递归的解析子节点
   // 然后我们会尝试解析 element 的子节点，将 element 压入栈中中，然后递归的调用 parseChildren 来解析子节点。
-  // Children.
+
+
+  /**
+   <div>
+    <p>Hello World</p>
+   </div>
+
+   上面模板的解析流程如下：
+    1.div 入栈
+    2. 解析div的子节点，将p标签压入栈中
+    3. 解析出文本节点：Hello World，放入p节点的children中，p.children = ['Hello World']
+    4. p 节点没有其余的子节点，解析完成出栈，div.children = [p]
+    5. div没有其余的子节点，匹配完结束标签后，返回解析结果，存放祖先节点的栈清空
+   */ 
+  // Children. 
   ancestors.push(element)
   const mode = context.options.getTextMode(element, parent)
   const children = parseChildren(context, mode, ancestors)
   ancestors.pop()
 
+  //! 再回头看看 parseChildren 以及 parseElement 中的这行代码，就可以发现在将 element 入栈后，
+  //! 我们拿到的父节点就是当前节点。在解析完毕后，调用 ancestors.pop() ，使当前解析完子节点的 element 对象出栈，
+  //! 将解析后的 children 对象赋值给 element 的 children 属性，完成 element 的子节点解析，这里是个很巧妙的设计。
   // 2.x inline-template compat
   if (__COMPAT__) {
     const inlineTemplateProp = element.props.find(
