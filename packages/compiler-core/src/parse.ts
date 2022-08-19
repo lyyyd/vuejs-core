@@ -476,6 +476,7 @@ function parseElement(
     4. p 节点没有其余的子节点，解析完成出栈，div.children = [p]
     5. div没有其余的子节点，匹配完结束标签后，返回解析结果，存放祖先节点的栈清空
    */ 
+  
   // Children. 
   ancestors.push(element)
   const mode = context.options.getTextMode(element, parent)
