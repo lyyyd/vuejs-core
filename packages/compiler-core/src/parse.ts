@@ -448,6 +448,7 @@ function parseElement(
   const isVPreBoundary = context.inVPre && !wasInVPre
 
   // 如果是自闭合的标签或者是空标签，则直接返回。voidTag例如： `<img>`, `<br>`, `<hr>`
+  // 在获取到 element 对象后，会判断 element 是否是自闭合标签，或者是空标签，例如 <img>， <br>， <hr> ，如果是这种情况，则直接返回 element 对象。
   if (element.isSelfClosing || context.options.isVoidTag(element.tag)) {
     // #4030 self-closing <pre> tag
     if (isPreBoundary) {
@@ -460,6 +461,7 @@ function parseElement(
   }
 
   // 递归的解析子节点
+  // 然后我们会尝试解析 element 的子节点，将 element 压入栈中中，然后递归的调用 parseChildren 来解析子节点。
   // Children.
   ancestors.push(element)
   const mode = context.options.getTextMode(element, parent)
@@ -567,9 +569,11 @@ function parseTag(
     context.inPre = true
   }
 
+  // 解析元素中的 attribute 属性，存储至 props 属性
   // Attributes.
   let props = parseAttributes(context, type)
 
+  // 检测是否存在 v-pre 指令，若是存在的话，则修改 context 上下文中的 inVPre 属性为 true
   // check v-pre
   if (
     type === TagType.Start &&
@@ -584,12 +588,13 @@ function parseTag(
     props = parseAttributes(context, type).filter(p => p.name !== 'v-pre')
   }
 
+  // 检测自闭合标签，如果是自闭合，则将 isSelfClosing 属性置为 true
   // Tag close.
   let isSelfClosing = false
   if (context.source.length === 0) {
     emitError(context, ErrorCodes.EOF_IN_TAG)
   } else {
-    isSelfClosing = startsWith(context.source, '/>')
+    isSelfClosing = startsWith(context.source, '/>') // 如果是自闭合，则将 isSelfClosing 属性置为 true
     if (type === TagType.End && isSelfClosing) {
       emitError(context, ErrorCodes.END_TAG_WITH_TRAILING_SOLIDUS)
     }
@@ -631,6 +636,7 @@ function parseTag(
     }
   }
 
+  // 判断 tagType，是 ELEMENT 元素还是 COMPONENT 组件，或者 SLOT 插槽
   let tagType = ElementTypes.ELEMENT
   if (!context.inVPre) {
     if (tag === 'slot') {
@@ -649,6 +655,7 @@ function parseTag(
     }
   }
 
+  // 返回生成的 element 对象
   return {
     type: NodeTypes.ELEMENT,
     ns,
