@@ -192,12 +192,14 @@ function parseChildren(
           }
         } else if (s[1] === '/') { // 之后会判断当第二个字符是 “/” 的情况，
           // https://html.spec.whatwg.org/multipage/parsing.html#end-tag-open-state
-          if (s.length === 2) {
+          if (s.length === 2) { // 长度只有两个字符 </, 抛出错误
             emitError(context, ErrorCodes.EOF_BEFORE_TAG_NAME, 2)
+            // “</” 已经满足了一个闭合标签的条件了，所以会尝试去匹配闭合标签。当第三个字符是 “>”，缺少了标签名字，会报错，并让解析器的进度前进三个字符，跳过 “</>”。
           } else if (s[2] === '>') {
             emitError(context, ErrorCodes.MISSING_END_TAG_NAME, 2)
             advanceBy(context, 3)
             continue
+            // 如果“</”开头，并且第三个字符是小写英文字符，解析器会解析结束标签。
           } else if (/[a-z]/i.test(s[2])) {
             emitError(context, ErrorCodes.X_INVALID_END_TAG)
             parseTag(context, TagType.End, parent)
@@ -210,6 +212,7 @@ function parseChildren(
             )
             node = parseBogusComment(context)
           }
+          // 如果源模板字符串的第一个字符是 “<”，第二个字符是小写英文字符开头，会调用 parseElement 函数来解析对应的标签。
         } else if (/[a-z]/i.test(s[1])) {
           node = parseElement(context, ancestors)
 
