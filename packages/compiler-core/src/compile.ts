@@ -97,10 +97,14 @@ export function baseCompile(
   if (options.scopeId && !isModuleMode) {
     onError(createCompilerError(ErrorCodes.X_SCOPE_ID_NOT_SUPPORTED))
   }
-
-  /* 
-    判断 template 模板是否为字符串，如果是的话则会对字符串进行解析，否则直接将 template 作为 AST 。其实我们平时在写的单文件 vue 代码，都是以字符串的形式传递进去的。
-  */
+  /**
+   * @description: 判断 template 模板是否为字符串，如果是的话则会对字符串进行解析，否则直接将 template 作为 AST 。
+   * 其实我们平时在写的单文件 vue 代码，都是以字符串的形式传递进去的。
+   * 可以看到 ast 的生成有一个三目运算符的判断，如果传进来的 template 模板参数是一个字符串，
+   * 那么则调用 baseParse 解析模板字符串，否则直接将 template 作为 ast 对象。
+   * baseParse 里做了什么事情才能生成 ast 呢？
+   * @return {*}
+   */ 
   const ast = isString(template) ? baseParse(template, options) : template
   const [nodeTransforms, directiveTransforms] =
     getBaseTransformPreset(prefixIdentifiers)
