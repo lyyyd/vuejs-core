@@ -108,6 +108,7 @@ export function baseParse(
   const context = createParserContext(content, options) // 创建解析的上下文对象
   const start = getCursor(context) // 生成记录解析过程的游标信息
   return createRoot( // 生成并返回 root 根节点
+    // parseChildren 函数如果不去看它的源码，见文之意也可以大致了解这是一个解析子节点的函数。
     parseChildren(context, TextModes.DATA, []), // 解析子节点，作为 root 根节点的 children 属性
     getSelection(context, start)
   )
