@@ -172,13 +172,17 @@ function parseChildren(
         // https://html.spec.whatwg.org/multipage/parsing.html#tag-open-state
         if (s.length === 1) { // s只有一个字符 <, 抛出错误
           emitError(context, ErrorCodes.EOF_BEFORE_TAG_NAME, 1)
+          // 如果源模板字符串的第以个字符位置是 `!`
         } else if (s[1] === '!') { // 第一个字符是 ! 
           // https://html.spec.whatwg.org/multipage/parsing.html#markup-declaration-open-state
+          // 如果以 '<!--' 开头，按注释解析
           if (startsWith(s, '<!--')) { // <!--开头
             node = parseComment(context)
           } else if (startsWith(s, '<!DOCTYPE')) { // <!DOCTYPE 开头， 对于 DOCTYPE 会进行忽略，解析成注释。
             // Ignore DOCTYPE by a limitation.
+             // 如果以 '<!DOCTYPE' 开头，忽略 DOCTYPE，当做伪注释解析
             node = parseBogusComment(context)
+            // 如果以 '<![CDATA[' 开头，又在 HTML 环境中，解析 CDATA
           } else if (startsWith(s, '<![CDATA[')) { // <![CDATA[ 开头
             if (ns !== Namespaces.HTML) {
               node = parseCDATA(context, ancestors)
@@ -192,6 +196,7 @@ function parseChildren(
           }
         } else if (s[1] === '/') { // 之后会判断当第二个字符是 “/” 的情况，
           // https://html.spec.whatwg.org/multipage/parsing.html#end-tag-open-state
+          // 如果源模板字符串的第三个字符位置是 '>'，那么就是自闭合标签，前进三个字符的扫描位置
           if (s.length === 2) { // 长度只有两个字符 </, 抛出错误
             emitError(context, ErrorCodes.EOF_BEFORE_TAG_NAME, 2)
             // “</” 已经满足了一个闭合标签的条件了，所以会尝试去匹配闭合标签。当第三个字符是 “>”，缺少了标签名字，会报错，并让解析器的进度前进三个字符，跳过 “</>”。
@@ -200,11 +205,11 @@ function parseChildren(
             advanceBy(context, 3)
             continue
             // 如果“</”开头，并且第三个字符是小写英文字符，解析器会解析结束标签。
-          } else if (/[a-z]/i.test(s[2])) {
+          } else if (/[a-z]/i.test(s[2])) { // 如果第三个字符位置是英文字符，解析结束标签
             emitError(context, ErrorCodes.X_INVALID_END_TAG)
             parseTag(context, TagType.End, parent)
             continue
-          } else {
+          } else { // 如果不是上述情况，则当做伪注释解析
             emitError(
               context,
               ErrorCodes.INVALID_FIRST_CHARACTER_OF_TAG_NAME,
@@ -239,22 +244,24 @@ function parseChildren(
               )
             node = node.children
           }
-        } else if (s[1] === '?') {
+        } else if (s[1] === '?') { // 如果第二个字符是 '?'，当做伪注释解析
           emitError(
             context,
             ErrorCodes.UNEXPECTED_QUESTION_MARK_INSTEAD_OF_TAG_NAME,
             1
           )
           node = parseBogusComment(context)
-        } else {
+        } else { // 都不是这些情况，则报出第一个字符不是合法标签字符的错误。
           emitError(context, ErrorCodes.INVALID_FIRST_CHARACTER_OF_TAG_NAME, 1)
         }
       }
     }
+    // 当这个判断字符串字符的分支条件结束，并且没有解析出任何 node 节点，那么会将 node 作为文本类型，调用 parseText 进行解析。
     if (!node) {
       node = parseText(context, mode)
     }
 
+    // 最后将生成的节点添加进 nodes 数组，在函数结束时返回。
     if (isArray(node)) {
       for (let i = 0; i < node.length; i++) {
         pushNode(nodes, node[i])
