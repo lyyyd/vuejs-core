@@ -442,11 +442,12 @@ function parseElement(
   // Start tag.
   const wasInPre = context.inPre
   const wasInVPre = context.inVPre
-  const parent = last(ancestors)
+  const parent = last(ancestors) // 解析起始标签
   const element = parseTag(context, TagType.Start, parent)
   const isPreBoundary = context.inPre && !wasInPre
   const isVPreBoundary = context.inVPre && !wasInVPre
 
+  // 如果是自闭合的标签或者是空标签，则直接返回。voidTag例如： `<img>`, `<br>`, `<hr>`
   if (element.isSelfClosing || context.options.isVoidTag(element.tag)) {
     // #4030 self-closing <pre> tag
     if (isPreBoundary) {
@@ -458,6 +459,7 @@ function parseElement(
     return element
   }
 
+  // 递归的解析子节点
   // Children.
   ancestors.push(element)
   const mode = context.options.getTextMode(element, parent)
@@ -488,6 +490,7 @@ function parseElement(
 
   element.children = children
 
+  // 解析结束标签
   // End tag.
   if (startsWithEndTagOpen(context.source, element.tag)) {
     parseTag(context, TagType.End, parent)
@@ -501,6 +504,7 @@ function parseElement(
     }
   }
 
+  // 获取标签位置对象
   element.loc = getSelection(context, element.loc.start)
 
   if (isPreBoundary) {
