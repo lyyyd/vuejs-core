@@ -1,3 +1,13 @@
+/*
+ * @Author: yanding.li David.Jackson.Lyd@gmail.com
+ * @Date: 2022-08-18 22:23:02
+ * @LastEditors: yanding.li David.Jackson.Lyd@gmail.com
+ * @LastEditTime: 2022-08-20 14:03:48
+ * @FilePath: \vuejs-core\packages\compiler-core\src\transforms\hoistStatic.ts
+ * @Description: 静态提升
+ * 
+ * Copyright (c) 2022 by yanding.li David.Jackson.Lyd@gmail.com, All Rights Reserved. 
+ */
 import {
   ConstantTypes,
   RootNode,
@@ -68,7 +78,7 @@ function walk(
       // 否则调用 getConstantType 获取子节点的静态类型
       const constantType = doNotHoistNode
         ? ConstantTypes.NOT_CONSTANT
-        : getConstantType(child, context)
+        : getConstantType(child, context) // 获取子节点的静态类型
         // 如果获取到的 constantType 枚举值大于 NOT_CONSTANT
       if (constantType > ConstantTypes.NOT_CONSTANT) {
         // 如果可以被提升
@@ -153,7 +163,7 @@ function walk(
     }
   }
 
-  // 是如何将节点字符序列化的
+  // 如何将节点字符序列化的
   if (hoistedCount && context.transformHoist) {
     context.transformHoist(children, context, node)
   }
