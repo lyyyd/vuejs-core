@@ -228,29 +228,34 @@ export function generate(
     genFunctionPreamble(ast, preambleContext)
   }
   // enter render function
+  // 生成后的函数名
   const functionName = ssr ? `ssrRender` : `render`
+  // 函数的传参
   const args = ssr ? ['_ctx', '_push', '_parent', '_attrs'] : ['_ctx', '_cache']
   if (!__BROWSER__ && options.bindingMetadata && !options.inline) {
     // binding optimization args
     args.push('$props', '$setup', '$data', '$options')
   }
+  // 函数签名，是 TypeScript 的话标记为 any 类型
   const signature =
     !__BROWSER__ && options.isTS
       ? args.map(arg => `${arg}: any`).join(',')
       : args.join(', ')
-
+  // 使用箭头函数还是函数声明来创建渲染函数
   if (isSetupInlined) {
     push(`(${signature}) => {`)
   } else {
     push(`function ${functionName}(${signature}) {`)
   }
   indent()
-
+  // 使用 with 扩展作用域
   if (useWithBlock) {
     push(`with (_ctx) {`)
     indent()
     // function mode const declarations should be inside with block
     // also they should be renamed to avoid collision with user properties
+    // 在 function mode 中，const 声明应该在代码块中，
+    // 并且应该重命名解构的变量，防止变量名和用户的变量名冲突
     if (hasHelpers) {
       push(`const { ${ast.helpers.map(aliasHelper).join(', ')} } = _Vue`)
       push(`\n`)
@@ -258,7 +263,18 @@ export function generate(
     }
   }
 
+  /**
+   * 资源的分解声明
+    在看到“资源的分解声明”这个小标题之前，
+    我们先需要搞明白生成器把什么定义成资源。
+    生成器将 AST 抽象语法树中解析出的 components 组件，directives 指令，
+    temps 临时变量，以及上个月尤大又在
+    Vue3 中兼容了 Vue2 filters 过滤器这四样类型当做资源。
+    在 render 函数中，该部分的处理会将上述资源都提前声明出来，
+    将 AST 树中解析出的资源 id 传入每个资源对应的处理函数，并生成对应的资源变量。
+   */  
   // generate asset resolution statements
+  // 如果 ast 中有组件，解析组件
   if (ast.components.length) {
     genAssets(ast.components, 'component', context)
     if (ast.directives.length || ast.temps > 0) {
