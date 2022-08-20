@@ -315,15 +315,15 @@ export function createTransformContext(
 }
 
 export function transform(root: RootNode, options: TransformOptions) {
-  const context = createTransformContext(root, options)
-  traverseNode(root, context)
-  if (options.hoistStatic) {
+  const context = createTransformContext(root, options) // 创建转换上下文
+  traverseNode(root, context) // 遍历所有节点，执行转换
+  if (options.hoistStatic) { // 如果编译选项中打开了 hoistStatic 开关，则进行静态提升
     hoistStatic(root, context)
   }
   if (!options.ssr) {
     createRootCodegen(root, context)
   }
-  // finalize meta information
+  // finalize meta information // 确定最终的元信息 
   root.helpers = [...context.helpers.keys()]
   root.components = [...context.components]
   root.directives = [...context.directives]
