@@ -594,15 +594,18 @@ function genNodeList(
 }
 
 function genNode(node: CodegenNode | symbol | string, context: CodegenContext) {
-  if (isString(node)) {
+  if (isString(node)) { // 如果是字符串，直接 push 入代码字符串
     context.push(node)
     return
   }
-  if (isSymbol(node)) {
+  if (isSymbol(node)) { // 如果 node 是 symbol 类型，传入辅助函数生成的代码字符串
     context.push(context.helper(node))
     return
   }
+  // 判断 node 类型
   switch (node.type) {
+    // 首先是第一个 case，当遇到 Element、IF 或 FOR 类型的节点类型时，
+    // 会递归的调用 genNode，继续去生成这三种节点类型的子节点，这样能够保证遍历的完整性。
     case NodeTypes.ELEMENT:
     case NodeTypes.IF:
     case NodeTypes.FOR:
@@ -614,9 +617,12 @@ function genNode(node: CodegenNode | symbol | string, context: CodegenContext) {
         )
       genNode(node.codegenNode!, context)
       break
+    // 当节点是一个文本类型时，会调用 genText 函数，直接将文本通过 JSON.stringify 序列化拼接进代码字符串中。
     case NodeTypes.TEXT:
       genText(node, context)
       break
+    // 当节点是一个简单表达式时，会判断该表达式是否是静态的，
+    // 如果是静态的，则通过 JSON 字符串序列化后拼入代码字符串，否则直接拼接表达式对应的 content。
     case NodeTypes.SIMPLE_EXPRESSION:
       genExpression(node, context)
       break
