@@ -492,9 +492,10 @@ function genAssets(
 }
 
 function genHoists(hoists: (JSChildNode | null)[], context: CodegenContext) {
-  if (!hoists.length) {
+  if (!hoists.length) { // 如果 hoists 数组中没有元素，说明不存在需要静态提升的节点，那直接返回即可。
     return
   }
+  // 否则就是存在需要提升的节点，那么将上下文的 pure 标记置为 true。
   context.pure = true
   const { push, newline, helper, scopeId, mode } = context
   const genScopeId = !__BROWSER__ && scopeId != null && mode !== 'function'
@@ -509,11 +510,12 @@ function genHoists(hoists: (JSChildNode | null)[], context: CodegenContext) {
     )
     newline()
   }
-
+  // 遍历 hoists 数组
   for (let i = 0; i < hoists.length; i++) {
     const exp = hoists[i]
     if (exp) {
       const needScopeIdWrapper = genScopeId && exp.type === NodeTypes.VNODE_CALL
+      // 根据数组的 index 生成静态提升的变量名 _hoisted_${index + 1}
       push(
         `const _hoisted_${i + 1} = ${
           needScopeIdWrapper ? `${PURE_ANNOTATION} _withScopeId(() => ` : ``
@@ -606,6 +608,8 @@ function genNode(node: CodegenNode | symbol | string, context: CodegenContext) {
   switch (node.type) {
     // 首先是第一个 case，当遇到 Element、IF 或 FOR 类型的节点类型时，
     // 会递归的调用 genNode，继续去生成这三种节点类型的子节点，这样能够保证遍历的完整性。
+    // 能知道其实生成器是根据不同节点的类型，
+    // push 进不同的代码字符串，而对于存在子节点的节点，又回去递归遍历，确保每个节点都能生成对应的代码字符串。
     case NodeTypes.ELEMENT:
     case NodeTypes.IF:
     case NodeTypes.FOR:
