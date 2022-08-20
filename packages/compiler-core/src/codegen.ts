@@ -219,9 +219,12 @@ export function generate(
   const preambleContext = isSetupInlined
     ? createCodegenContext(ast, options)
     : context
+  // 不在浏览器的环境且 mode 是 module
   if (!__BROWSER__ && mode === 'module') {
+    // 使用 ES module 标准的 import 来导入 helper 的辅助函数，处理生成代码的前置部分
     genModulePreamble(ast, preambleContext, genScopeId, isSetupInlined)
   } else {
+    // 否则生成的代码前置部分是一个单一的 const { helpers... } = Vue 处理代码前置部分
     genFunctionPreamble(ast, preambleContext)
   }
   // enter render function
