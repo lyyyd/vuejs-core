@@ -57,7 +57,7 @@ function walk(
   let hoistedCount = 0
 
   for (let i = 0; i < children.length; i++) {
-    const child = children[i]
+    const child = children[i] // 遍历的每个节点
     // only plain elements & text calls are eligible for hoisting.
     // 只有简单的元素以及文本是可以被合法提升的
     if (
