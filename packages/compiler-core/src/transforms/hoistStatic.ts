@@ -115,6 +115,13 @@ function walk(
       hoistedCount++
     }
 
+    /**
+     * walk futher 的部分会尝试判断元素为组件、v-for、v-if 的情况。
+     * 再一次遍历组件的目的是为了检查其中的插槽是否能被静态提升。
+     * v-for 和 v-if 也是一样，检查 v-for 循环生成的节点以及 v-if 的分支条件能否被静态提升。
+     * 但是这里需要注意，如果 v-for 是单一节点或者 v-if 的分支中只有一个分支判断那么均不会进行提升，
+     * 因为它们会是一个 block 类型。
+     */    
     // walk further
     if (child.type === NodeTypes.ELEMENT) {
       // 如果子节点的 tagType 是组件，则继续遍历子节点
@@ -133,7 +140,9 @@ function walk(
       // Do not hoist v-for single child because it has to be a block
       walk(child, context, child.children.length === 1)
     } else if (child.type === NodeTypes.IF) {
+      // 如果子节点是 v-if 类型，判断它所有的分支情况
       for (let i = 0; i < child.branches.length; i++) {
+        // 如果只有一个分支条件，则不进行提升
         // Do not hoist v-if single child because it has to be a block
         walk(
           child.branches[i],
@@ -144,6 +153,7 @@ function walk(
     }
   }
 
+  // 是如何将节点字符序列化的
   if (hoistedCount && context.transformHoist) {
     context.transformHoist(children, context, node)
   }
@@ -164,6 +174,7 @@ function walk(
   }
 }
 
+// getConstantType 这个函数是如何区分各个节点类型来返回静态类型的
 export function getConstantType(
   node: TemplateChildNode | SimpleExpressionNode,
   context: TransformContext
