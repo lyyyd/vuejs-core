@@ -31,7 +31,7 @@ export function hoistStatic(root: RootNode, context: TransformContext) {
     context,
     // Root node is unfortunately non-hoistable due to potential parent
     // fallthrough attributes.
-    isSingleElementRoot(root, root.children[0])
+    isSingleElementRoot(root, root.children[0]) // 很不幸，根节点是不能被静态提升的
   )
 }
 
