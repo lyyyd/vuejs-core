@@ -1,3 +1,13 @@
+/*
+ * @Author: yanding.li David.Jackson.Lyd@gmail.com
+ * @Date: 2022-08-18 22:23:02
+ * @LastEditors: yanding.li David.Jackson.Lyd@gmail.com
+ * @LastEditTime: 2022-08-20 17:02:14
+ * @FilePath: \vuejs-core\packages\compiler-core\src\codegen.ts
+ * @Description: 代码生成器
+ * 
+ * Copyright (c) 2022 by yanding.li David.Jackson.Lyd@gmail.com, All Rights Reserved. 
+ */
 import { CodegenOptions } from './options'
 import {
   RootNode,
@@ -189,6 +199,7 @@ function createCodegenContext(
   return context
 }
 
+// 代码生成器
 export function generate(
   ast: RootNode,
   options: CodegenOptions & {
@@ -490,7 +501,7 @@ function genAssets(
     }
   }
 }
-
+// 处理静态提升
 function genHoists(hoists: (JSChildNode | null)[], context: CodegenContext) {
   if (!hoists.length) { // 如果 hoists 数组中没有元素，说明不存在需要静态提升的节点，那直接返回即可。
     return
@@ -529,6 +540,8 @@ function genHoists(hoists: (JSChildNode | null)[], context: CodegenContext) {
     }
   }
 
+  // 在遍历完所有的需要提升的变量后，将 pure 标记置为 false。
+  // 而这里 pure 标记的作用，就是在某些节点类型生成字符串前，添加 /*#__PURE__*/ 注释前缀，表明该节点是静态节点。
   context.pure = false
 }
 
