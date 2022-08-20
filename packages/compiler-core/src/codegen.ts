@@ -276,23 +276,28 @@ export function generate(
   // generate asset resolution statements
   // 如果 ast 中有组件，解析组件
   if (ast.components.length) {
+    // 所以从结果去倒推 genAssets 函数做过的事情，就是根据资源类型 + 
+    // 资源 ID 当做变量名，并将资源ID传入类型对应的 resolve 函数，
+    // 并将结果赋值给声明的变量。
     genAssets(ast.components, 'component', context)
     if (ast.directives.length || ast.temps > 0) {
       newline()
     }
   }
+  // 如果 ast 中有指令
   if (ast.directives.length) {
     genAssets(ast.directives, 'directive', context)
     if (ast.temps > 0) {
       newline()
     }
   }
+  // 如果 ast 中有过滤器
   if (__COMPAT__ && ast.filters && ast.filters.length) {
     newline()
     genAssets(ast.filters, 'filter', context)
     newline()
   }
-
+  // 如果 ast 中有temps 临时变量
   if (ast.temps > 0) {
     push(`let `)
     for (let i = 0; i < ast.temps; i++) {
