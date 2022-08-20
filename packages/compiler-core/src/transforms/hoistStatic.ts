@@ -27,8 +27,8 @@ import {
 
 export function hoistStatic(root: RootNode, context: TransformContext) {
   walk(
-    root,
-    context,
+    root, // 根节点
+    context, // 转换器上下文
     // Root node is unfortunately non-hoistable due to potential parent
     // fallthrough attributes.
     isSingleElementRoot(root, root.children[0]) // 很不幸，根节点是不能被静态提升的
@@ -48,9 +48,9 @@ export function isSingleElementRoot(
 }
 
 function walk(
-  node: ParentNode,
-  context: TransformContext,
-  doNotHoistNode: boolean = false
+  node: ParentNode, // 一个 node 节点
+  context: TransformContext, // context 转换器的上下文
+  doNotHoistNode: boolean = false // doNotHoistNode 这样一个布尔值来从外部告知该节点是否可以被提升。
 ) {
   const { children } = node
   const originalCount = children.length
