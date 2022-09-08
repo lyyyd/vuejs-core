@@ -2,7 +2,7 @@
  * @Author: yanding.li David.Jackson.Lyd@gmail.com
  * @Date: 2022-08-18 22:23:02
  * @LastEditors: yanding.li David.Jackson.Lyd@gmail.com
- * @LastEditTime: 2022-09-08 21:05:18
+ * @LastEditTime: 2022-09-09 07:27:06
  * @FilePath: \vuejs-core\packages\compiler-core\src\codegen.ts
  * @Description: 代码生成器
  * 
@@ -181,7 +181,7 @@ function createCodegenContext(
       source: context.filename,
       original: {
         line: loc.line,
-        column: loc.column - 1 // source-map column is 0 based ...........
+        column: loc.column - 1 // source-map column is 0 based ..........
       },
       generated: {
         line: context.line,
