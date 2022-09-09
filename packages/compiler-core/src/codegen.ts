@@ -181,7 +181,7 @@ function createCodegenContext(
       source: context.filename,
       original: {
         line: loc.line,
-        column: loc.column - 1 // source-map column is 0 based ........
+        column: loc.column - 1 // source-map column is 0 based .........
       },
       generated: {
         line: context.line,
