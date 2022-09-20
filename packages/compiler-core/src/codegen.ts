@@ -2,7 +2,7 @@
  * @Author: yanding.li David.Jackson.Lyd@gmail.com
  * @Date: 2022-08-18 22:23:02
  * @LastEditors: yanding.li David.Jackson.Lyd@gmail.com
- * @LastEditTime: 2022-09-19 19:51:32
+ * @LastEditTime: 2022-09-20 21:38:08
  * @FilePath: \vuejs-core\packages\compiler-core\src\codegen.ts
  * @Description: 代码生成器
  * 
@@ -191,7 +191,7 @@ function createCodegenContext(
   }
 
   if (!__BROWSER__ && sourceMap) {
-    // lazy require source-map implementation, only in non-browser builds ..
+    // lazy require source-map implementation, only in non-browser builds ...
     context.map = new SourceMapGenerator()
     context.map!.setSourceContent(filename, context.source)
   }
